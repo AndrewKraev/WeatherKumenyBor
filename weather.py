@@ -87,6 +87,7 @@ def send_welcome(message):
 def callback(call):
 
     if call.message:
+        bot.answer_callback_query(call.id)
         bot.send_message(call.message.chat.id, 'Тут пока ничего нет, но скоро будет. Пока жми на кнопки внизу.')
 
 bot.infinity_polling()
