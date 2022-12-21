@@ -20,10 +20,10 @@ def show_btn():
     
 def show_ibtn():
     i_keyboard = types.InlineKeyboardMarkup(row_width=1)
-    ibtn_now = types.InlineKeyboardButton('Погода сейчас', callback_data='weather_now')
-    ibtn_tem = types.InlineKeyboardButton('Погода завтра', callback_data='weather_tem')
-    ibtn_2h = types.InlineKeyboardButton('Через два часа', callback_data='weather_2h')
-    i_keyboard.add(ibtn_now,ibtn_tem,ibtn_2h)
+    ibtn_now = types.InlineKeyboardButton('Погода на три дня', callback_data='weather_3days')
+#    ibtn_tem = types.InlineKeyboardButton('Погода завтра', callback_data='weather_tem')
+#    ibtn_2h = types.InlineKeyboardButton('Через два часа', callback_data='weather_2h')
+    i_keyboard.add(ibtn_now)
     return i_keyboard
 
 # Запрос к yandex погода
@@ -69,10 +69,7 @@ def start(message):
         
 @bot.message_handler(content_types='text')
 def send_welcome(message):
-
-        if message.text == 'Погода сейчас':
-            bot.send_message(message.chat.id, text = 'Выберите город', reply_markup=show_btn())
-        elif message.text == 'Киров':
+        if message.text == 'Киров':
             text_out = weather_now(message.text)    
             bot_log(message)
             bot.send_message(message.chat.id, text = text_out, reply_markup=show_ibtn())
@@ -86,8 +83,11 @@ def send_welcome(message):
 @bot.callback_query_handler(func=lambda call:True)
 def callback(call):
 
-    if call.message:
+    if call.message == 'weather_3days':
+    
         bot.answer_callback_query(call.id)
         bot.send_message(call.message.chat.id, 'Тут пока ничего нет, но скоро будет. Пока жми на кнопки внизу.')
+        
+        text_3days = weather_3days()
 
 bot.infinity_polling()
