@@ -18,12 +18,12 @@ def show_btn():
     keyboard.add(btn_kumeny,btn_kirov)
     return keyboard
     
-def show_ibtn():
+def show_ibtn(i_city):
     i_keyboard = types.InlineKeyboardMarkup(row_width=1)
-    ibtn_now = types.InlineKeyboardButton('Погода на три дня', callback_data='weather_3days')
+    ibtn_3d = types.InlineKeyboardButton('Погода на три дня', callback_data=i_city)
 #    ibtn_tem = types.InlineKeyboardButton('Погода завтра', callback_data='weather_tem')
 #    ibtn_2h = types.InlineKeyboardButton('Через два часа', callback_data='weather_2h')
-    i_keyboard.add(ibtn_now)
+    i_keyboard.add(ibtn_3d)
     return i_keyboard
 
 # Запрос к yandex погода
@@ -72,22 +72,28 @@ def send_welcome(message):
         if message.text == 'Киров':
             text_out = weather_now(message.text)    
             bot_log(message)
-            bot.send_message(message.chat.id, text = text_out, reply_markup=show_ibtn())
+            bot.send_message(message.chat.id, text = text_out, reply_markup=show_ibtn(message.text))
         elif message.text == 'Кумены':
             text_out = weather_now(message.text)    
             bot_log(message)
-            bot.send_message(message.chat.id, text = text_out, reply_markup=show_ibtn())
+            bot.send_message(message.chat.id, text = text_out, reply_markup=show_ibtn(message.text))
         else:
             bot.send_message(message.chat.id, text = 'Жми на кнопку-узнаешь погоду', reply_markup=show_btn())
 
 @bot.callback_query_handler(func=lambda call:True)
 def callback(call):
 
-    if call.message == 'weather_3days':
-    
-        bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, 'Тут пока ничего нет, но скоро будет. Пока жми на кнопки внизу.')
+    if call.message:
+        if call.data == 'Кумены':
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, call.data)
+        elif call.data == 'Киров':
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, call.data)
+        else:
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, 'Тут пока ничего нет')        
         
-        text_3days = weather_3days()
-
 bot.infinity_polling()
+
+
