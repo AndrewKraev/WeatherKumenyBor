@@ -20,7 +20,7 @@ def show_btn():
     
 def show_ibtn(i_city):
     i_keyboard = types.InlineKeyboardMarkup(row_width=1)
-    ibtn_3d = types.InlineKeyboardButton('Погода на три дня', callback_data=i_city)
+    ibtn_3d = types.InlineKeyboardButton('Погода на семь дней', callback_data=i_city)
 #    ibtn_tem = types.InlineKeyboardButton('Погода завтра', callback_data='weather_tem')
 #    ibtn_2h = types.InlineKeyboardButton('Через два часа', callback_data='weather_2h')
     i_keyboard.add(ibtn_3d)
@@ -60,6 +60,17 @@ def weather_now(name_city):
         temp10 = config.prec_strength.get(res['fact']['prec_strength'])
         temp = temp0+'\n'+temp2+'\n'+temp3+'\n'+temp4+'\n'+temp5+'\n'+temp6+'\n'+temp7+'\n'+temp10+temp8
         return temp
+def weather_3d(name_city_3d):
+        tmp = ''
+        res_3d = get_yandex(config.city.get(name_city_3d)[1],config.city.get(name_city_3d)[2])
+        
+        tmp = 'Погода на семь дней в '+ config.city.get(name_city_3d)[0]+'\n'
+        
+        for data_3d in res_3d['forecasts']:
+            
+             tmp = tmp + '\n'+data_3d['date']+'\t'+str(data_3d['parts']['day_short']['temp']).rjust(10)+'(°C)'.rjust(5)+'\t'+str(data_3d['parts']['day_short']['pressure_mm']).rjust(10)+' в мм рт.ст.'
+       
+        return tmp
 
 bot = telebot.TeleBot(config.token)
 
@@ -86,10 +97,10 @@ def callback(call):
     if call.message:
         if call.data == 'Кумены':
             bot.answer_callback_query(call.id)
-            bot.send_message(call.message.chat.id, call.data)
+            bot.send_message(call.message.chat.id, weather_3d(call.data))
         elif call.data == 'Киров':
             bot.answer_callback_query(call.id)
-            bot.send_message(call.message.chat.id, call.data)
+            bot.send_message(call.message.chat.id, weather_3d(call.data))
         else:
             bot.answer_callback_query(call.id)
             bot.send_message(call.message.chat.id, 'Тут пока ничего нет')        
