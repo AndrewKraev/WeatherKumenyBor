@@ -67,8 +67,8 @@ def weather_3d(name_city_3d):
         tmp = 'Погода на семь дней в '+ config.city.get(name_city_3d)[0]+'\n'
         
         for data_3d in res_3d['forecasts']:
-            
-             tmp = tmp + '\n'+data_3d['date']+'\t'+str(data_3d['parts']['day_short']['temp']).rjust(10)+'(°C)'.rjust(5)+'\t'+str(data_3d['parts']['day_short']['pressure_mm']).rjust(10)+' в мм рт.ст.'
+                      
+             tmp = tmp +'\n'+'{:>8}   {:=03} {:>4}   {:>3} {}   {}'.format(data_3d['date'],data_3d['parts']['day_short']['temp'],'(°C)',data_3d['parts']['day_short']['pressure_mm'],'мм рт.ст.',config.dict_cond.get(data_3d['parts']['day_short']['condition']))
        
         return tmp
 
