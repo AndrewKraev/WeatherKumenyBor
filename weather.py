@@ -11,18 +11,14 @@ import datetime
 # Формируем кнопки
 def show_btn():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-#    btn_weather_now = types.KeyboardButton(text='Погода сейчас')
     btn_kumeny = types.KeyboardButton(text='Кумены')
     btn_kirov = types.KeyboardButton(text='Киров')
-#    keyboard.add(btn_weather_now)
     keyboard.add(btn_kumeny,btn_kirov)
     return keyboard
     
 def show_ibtn(i_city):
     i_keyboard = types.InlineKeyboardMarkup(row_width=1)
-    ibtn_3d = types.InlineKeyboardButton('Погода на семь дней', callback_data=i_city)
-#    ibtn_tem = types.InlineKeyboardButton('Погода завтра', callback_data='weather_tem')
-#    ibtn_2h = types.InlineKeyboardButton('Через два часа', callback_data='weather_2h')
+    ibtn_3d = types.InlineKeyboardButton('Прогноз', callback_data=i_city)
     i_keyboard.add(ibtn_3d)
     return i_keyboard
 
@@ -48,7 +44,7 @@ def bot_log(mes):
 def weather_now(name_city):
         res = get_yandex(config.city.get(name_city)[1],config.city.get(name_city)[2])
     
-        temp0 = 'Погода в '+ config.city.get(name_city)[0]
+        temp0 = 'Сейчас в '+ config.city.get(name_city)[0]
         temp2 = '\nТемпература \t'+str(res['fact']['temp'])+' (°C)'
         temp3 = 'Ощущается как \t'+str(res['fact']['feels_like'])+' (°C)'
         temp4 = 'Скорость ветра \t'+ str(res['fact']['wind_speed'])+' (м/с)'
@@ -57,20 +53,33 @@ def weather_now(name_city):
         temp7 = 'Давление \t'+ str(res['fact']['pressure_mm'])+' в мм рт.ст.'
         temp8 = config.dict_cond.get(res['fact']['condition'])
         temp9 = res['fact']['prec_type']
-        temp10 = config.prec_strength.get(res['fact']['prec_strength'])
-        temp = temp0+'\n'+temp2+'\n'+temp3+'\n'+temp4+'\n'+temp5+'\n'+temp6+'\n'+temp7+'\n'+temp10+temp8
+        temp = temp0+'\n'+temp2+'\n'+temp3+'\n'+temp4+'\n'+temp5+'\n'+temp6+'\n'+temp7+'\n'+temp8
+        
         return temp
+        
 def weather_3d(name_city_3d):
+        tmp_out = []
         tmp = ''
+        day = 0
+                
         res_3d = get_yandex(config.city.get(name_city_3d)[1],config.city.get(name_city_3d)[2])
-        
-        tmp = 'Погода на семь дней в '+ config.city.get(name_city_3d)[0]+'\n'
-        
+         
         for data_3d in res_3d['forecasts']:
-                      
-             tmp = tmp +'\n'+'{:>8}   {:=03} {:>4}   {:>3} {}   {}'.format(data_3d['date'],data_3d['parts']['day_short']['temp'],'(°C)',data_3d['parts']['day_short']['pressure_mm'],'мм рт.ст.',config.dict_cond.get(data_3d['parts']['day_short']['condition']))
+            if day == 0: 
+                tmp = 'Cегодня в '+ config.city.get(name_city_3d)[0]    
+            elif day == 1:
+                tmp = 'Завтра в '+ config.city.get(name_city_3d)[0]
+            elif day == 2:
+                tmp = 'Послезавтра в '+ config.city.get(name_city_3d)[0]
+            else:
+                break
+#            day_out = datetime.datetime.strptime(data_3d['date'],'%Y-%m-%d')
+#             day_out.strftime('%d.%m.%Y')
+            tmp = tmp +'\n'+'\nТемпература  {:>3} {:>4}\nДавление  {:>3} {}\n{}'.format(str(data_3d['parts']['day_short']['temp']),'(°C)',data_3d['parts']['day_short']['pressure_mm'],'мм рт.ст.',config.dict_cond.get(data_3d['parts']['day_short']['condition']))
+            tmp_out.append(tmp)
+            day = day +1
        
-        return tmp
+        return tmp_out
 
 bot = telebot.TeleBot(config.token)
 
@@ -97,10 +106,14 @@ def callback(call):
     if call.message:
         if call.data == 'Кумены':
             bot.answer_callback_query(call.id)
-            bot.send_message(call.message.chat.id, weather_3d(call.data))
+            bot.send_message(call.message.chat.id, weather_3d(call.data)[0])
+            bot.send_message(call.message.chat.id, weather_3d(call.data)[1])
+            bot.send_message(call.message.chat.id, weather_3d(call.data)[2])
         elif call.data == 'Киров':
             bot.answer_callback_query(call.id)
-            bot.send_message(call.message.chat.id, weather_3d(call.data))
+            bot.send_message(call.message.chat.id, weather_3d(call.data)[0])
+            bot.send_message(call.message.chat.id, weather_3d(call.data)[1])
+            bot.send_message(call.message.chat.id, weather_3d(call.data)[2])
         else:
             bot.answer_callback_query(call.id)
             bot.send_message(call.message.chat.id, 'Тут пока ничего нет')        
